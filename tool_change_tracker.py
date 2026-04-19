@@ -163,8 +163,8 @@ def pre_scan_gcode(gcode_path=None):
         for i, info in enumerate(filament_info):
             print(f"  Tool {i}: {info['color_name']} ({info['brand']} {info['material']})")
         
-        data = {"total_changes": 0, "current_change": 0, "changes": []}
-        
+        raw_changes = []
+
         with open(gcode_file, "r") as f:
             for line_number, line in enumerate(f, 1):
                 match = re.search(r'; MANUAL_TOOL_CHANGE T(\d+)', line)
@@ -173,24 +173,36 @@ def pre_scan_gcode(gcode_path=None):
                     if tool_number < len(filament_info):
                         info = filament_info[tool_number]
                         tool_color = info["color_name"]
+                        tool_hex = info["hex_color"]
                         tool_brand = info["brand"]
                         tool_material = info["material"]
                         tool_full_name = info["full_name"]
                     else:
                         tool_color = "Unknown"
+                        tool_hex = "#FFFFFF"
                         tool_brand = "Unknown"
                         tool_material = "Unknown"
                         tool_full_name = "Unknown"
-                    
-                    data["total_changes"] += 1
-                    data["changes"].append({
+
+                    raw_changes.append({
                         "tool_number": tool_number,
                         "color": tool_color,
+                        "hex_color": tool_hex,
                         "brand": tool_brand,
                         "material": tool_material,
                         "full_name": tool_full_name,
                         "line": line_number
                     })
+
+        # OrcaSlicer includes the starting tool/color as the first MANUAL_TOOL_CHANGE
+        # marker. That entry describes the filament already loaded, not a swap the user
+        # still needs to make, so exclude it from the tracked change list.
+        changes = raw_changes[1:] if len(raw_changes) > 1 else raw_changes
+        data = {
+            "total_changes": len(changes),
+            "current_change": 0,
+            "changes": changes,
+        }
         
         with open(DATA_FILE, "w") as f:
             json.dump(data, f, indent=2)
