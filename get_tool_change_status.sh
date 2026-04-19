@@ -11,8 +11,7 @@ if [ "$current_change" -ge "$total_changes" ]; then
     echo "Tool changes completed."
     exit 0
 fi
-# Extract the tool number and color for the current
-change
+# Extract the tool number and color for the current change
 tool_number=$(jq ".changes[$current_change].tool_number" "$JSON_FILE")
 color=$(jq -r ".changes[$current_change].color" "$JSON_FILE")
 line=$(jq ".changes[$current_change].line" "$JSON_FILE")
