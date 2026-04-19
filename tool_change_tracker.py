@@ -12,6 +12,12 @@ GCODE_DIR = os.path.join(HOME, "printer_data/gcodes")
 DATA_FILE = "/tmp/tool_change_data.json"
 
 # Embedded CSS Named Colors
+HEX_COLOR_OVERRIDES = {
+    "#2D3F6F": "Navy Blue",
+    "#BB2C2E": "Ruby Red",
+    "#F6F6F6": "White",
+}
+
 CSS_NAMED_COLORS = {
     "#F0F8FF": "AliceBlue", "#FAEBD7": "AntiqueWhite", "#00FFFF": "Aqua", "#7FFFD4": "Aquamarine",
     "#F0FFFF": "Azure", "#F5F5DC": "Beige", "#FFE4C4": "Bisque", "#000000": "Black",
@@ -57,9 +63,14 @@ def find_latest_gcode():
         print(f"ERROR: Could not find G-code file: {e}")
         sys.exit(1)
 
-# Function to find the closest CSS color
+# Function to find the closest CSS color:
 def closest_css_color(hex_color):
     try:
+        hex_color = hex_color.upper()
+
+        if hex_color in HEX_COLOR_OVERRIDES:
+            return HEX_COLOR_OVERRIDES[hex_color]
+
         r1, g1, b1 = [int(hex_color[i:i+2], 16) for i in (1, 3, 5)]
         closest_color = None
         min_distance = float('inf')
@@ -67,7 +78,7 @@ def closest_css_color(hex_color):
         for css_hex, name in CSS_NAMED_COLORS.items():
             r2, g2, b2 = [int(css_hex[i:i+2], 16) for i in (1, 3, 5)]
             distance = sqrt((r1 - r2)**2 + (g1 - g2)**2 + (b1 - b2)**2)
-            
+
             if distance < min_distance:
                 min_distance = distance
                 closest_color = name
@@ -76,6 +87,7 @@ def closest_css_color(hex_color):
     except Exception as e:
         print(f"WARNING: Color conversion error: {e}")
         return "Unknown"
+
 
 # Function to extract filament information from G-code
 def extract_filament_info(gcode_file):

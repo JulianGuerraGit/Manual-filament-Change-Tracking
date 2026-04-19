@@ -10,7 +10,7 @@ fi
 
 TOOL_NUMBER="$1"
 NEW_COLOR="$2"
-TRACKER_FILE="/home/cody/tool_change_tracker.py"
+TRACKER_FILE="/home/julian/tool_change_tracker.py"
 
 # This sed command does the following:
 # 1. Matches the entire line starting with "TOOL_COLORS = {" up to the specific tool number's value.
